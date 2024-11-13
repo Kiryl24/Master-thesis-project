@@ -31,4 +31,7 @@ For Raspberry application, we need to have python installed. Needed libraries:
 
 pip3 install tensorflow librosa sounddevice matplotlib pillow
 
+Graphic interface will be written using Kivy:  https://kivy.org/doc/stable/installation/installation-rpi.html , https://kivy.org/doc/stable/gettingstarted/installation.html#installation-canonical 
+
+
 
