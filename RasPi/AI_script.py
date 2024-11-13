@@ -58,10 +58,8 @@ def predict_label(mel_image, chroma_image):
     return predicted_label
 
 while True:
-    print("Press Enter to start recording...")
-    input()  
+    print("Starting recording...")
 
-    
     for i in range(3, 0, -1):
         print(i)
         time.sleep(1)
