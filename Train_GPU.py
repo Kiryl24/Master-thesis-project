@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import Model, Input
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D, Dense, Dropout
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D, Dense, Dropout, BatchNormalization
 from tensorflow.keras.optimizers import Adam
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,24 +15,34 @@ else:
     print("No GPU found. Using CPU.")
 
 
-mel_image_shape = (96, 96, 1)
+mel_image_shape = (128, 128, 1)
 num_classes = 3
 
 
 mel_input = Input(shape=mel_image_shape, name="mel_input")
-x = Conv2D(16, (3, 3), activation='relu', padding='same')(mel_input)
+x = Conv2D(32, (3, 3), activation='relu', padding='same')(mel_input)
+x = BatchNormalization()(x)
 x = MaxPooling2D((2, 2))(x)
-x = Conv2D(32, (3, 3), activation='relu', padding='same')(x)
-x = MaxPooling2D((2, 2))(x)
+
 x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+x = BatchNormalization()(x)
 x = MaxPooling2D((2, 2))(x)
+
+x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+x = BatchNormalization()(x)
+x = MaxPooling2D((2, 2))(x)
+
+x = Conv2D(256, (3, 3), activation='relu', padding='same')(x)
+x = BatchNormalization()(x)
+x = MaxPooling2D((2, 2))(x)
+
 x = GlobalAveragePooling2D()(x)
-x = Dense(64, activation='relu')(x)
+x = Dense(128, activation='relu')(x)
 x = Dropout(0.5)(x)
 output = Dense(num_classes, activation='softmax', name="output")(x)
 
 model = Model(inputs=mel_input, outputs=output)
-model.compile(optimizer=Adam(learning_rate=0.001), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=Adam(learning_rate=0.00003), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 model.summary()
 
 
@@ -41,7 +51,7 @@ mel_train_dir = 'Train_data/MEL'
 
 mel_generator = mel_datagen.flow_from_directory(
     mel_train_dir,
-    target_size=(96, 96),
+    target_size=(128, 128),
     color_mode='grayscale',
     batch_size=8,
     class_mode='sparse',
@@ -52,7 +62,7 @@ mel_generator = mel_datagen.flow_from_directory(
 dataset = tf.data.Dataset.from_generator(
     lambda: mel_generator,
     output_signature=(
-        tf.TensorSpec(shape=(None, 96, 96, 1), dtype=tf.float32),
+        tf.TensorSpec(shape=(None, 128, 128, 1), dtype=tf.float32),
         tf.TensorSpec(shape=(None,), dtype=tf.int32)
     )
 )
@@ -67,15 +77,20 @@ history = model.fit(
 )
 
 
+
 plt.figure(figsize=(12, 6))
+
+
 plt.subplot(1, 2, 1)
 plt.plot(history.history['accuracy'], label='Training Accuracy')
 plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.axhline(y=1, color='black', linestyle='--', label='y = 1')  
 plt.title('Accuracy vs Epochs')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.legend()
 plt.savefig('accuracy_plot.png')
+
 
 plt.subplot(1, 2, 2)
 plt.plot(history.history['loss'], label='Training Loss')
@@ -85,6 +100,8 @@ plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend()
 plt.savefig('loss_plot.png')
+
+
 plt.show()
 
 
