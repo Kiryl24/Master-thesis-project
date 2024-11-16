@@ -5,16 +5,25 @@ import sounddevice as sd
 import librosa
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image, ImageOps
 from tensorflow.keras.preprocessing.image import img_to_array
 
 
-interpreter = tf.lite.Interpreter(model_path="model.tflite")
+if not os.path.exists('temp'):
+    os.makedirs('temp')
+
+
+interpreter = tf.lite.Interpreter(model_path="AI/Models/TM/model_96_TM.tflite")
 interpreter.allocate_tensors()
 
 
+class_names = open("AI/Models/TM/labels.txt", "r").readlines()
+
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
+
+
+data = np.ndarray(shape=(1, 96, 96, 1), dtype=np.float32)
 
 
 def record_audio(duration=4, sample_rate=22050):
@@ -31,7 +40,7 @@ def create_mel_spectrogram(audio, sample_rate=22050):
 
 
 def save_spectrogram(image, filename):
-    plt.figure(figsize=(1.28, 1.28), dpi=100)  
+    plt.figure(figsize=(1.28, 1.28), dpi=100)
     plt.axis('off')
     plt.imshow(image, cmap='gray', aspect='auto')
     plt.savefig(filename, bbox_inches='tight', pad_inches=0)
@@ -40,21 +49,27 @@ def save_spectrogram(image, filename):
 
 def predict_label(mel_image):
     
-    mel_array = img_to_array(mel_image).astype('float32') / 255.0
-    mel_array = np.expand_dims(mel_array, axis=0)
+    mel_image = mel_image.convert("L").resize((96, 96))  
+    mel_array = img_to_array(mel_image).astype('float32') / 127.5 - 1  
 
     
+    mel_array = np.expand_dims(mel_array, axis=0)
     interpreter.set_tensor(input_details[0]['index'], mel_array)
     interpreter.invoke()
 
     
     predictions = interpreter.get_tensor(output_details[0]['index'])
     predicted_label = np.argmax(predictions)
-    return predicted_label
+    confidence_score = predictions[0][predicted_label]
+
+    class_name = class_names[predicted_label].strip()  
+    return class_name, confidence_score
+
 
 while True:
     print("Starting recording...")
 
+    
     for i in range(3, 0, -1):
         print(i)
         time.sleep(1)
@@ -63,21 +78,25 @@ while True:
     audio_data = record_audio()
 
     
-    librosa.output.write_wav("temp.wav", audio_data, sr=22050)
+    temp_wav_path = "temp/temp.wav"
+    librosa.output.write_wav(temp_wav_path, audio_data, sr=22050)
 
     
     mel_spec = create_mel_spectrogram(audio_data)
-    save_spectrogram(mel_spec, "mel_spec.png")
 
     
-    mel_image = Image.open("mel_spec.png").convert("L").resize((128, 128))
+    temp_img_path = "temp/mel_spec.png"
+    mel_image = Image.fromarray(mel_spec)
+    mel_image = mel_image.convert("L").resize((96, 96))  
+    save_spectrogram(mel_image, temp_img_path)
 
     
-    predicted_label = predict_label(mel_image)
-    print("Predicted label:", predicted_label)
+    class_name, confidence_score = predict_label(mel_image)
+    print("Predicted class:", class_name)
+    print("Confidence Score:", confidence_score)
 
     
-    os.remove("temp.wav")
-    os.remove("mel_spec.png")
+    os.remove(temp_wav_path)
+    os.remove(temp_img_path)
 
     print("Ready for the next recording...\n")

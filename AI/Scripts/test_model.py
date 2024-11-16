@@ -1,52 +1,43 @@
-import tensorflow as tf
+from keras.models import load_model  
+from PIL import Image, ImageOps  
 import numpy as np
-import librosa
-import librosa.display
-import matplotlib.pyplot as plt
-from PIL import Image
 
 
-interpreter = tf.lite.Interpreter(model_path="model.tflite")
-interpreter.allocate_tensors()
+np.set_printoptions(suppress=True)
 
 
-input_details = interpreter.get_input_details()
-output_details = interpreter.get_output_details()
+model = load_model("AI/Models/Keras/keras_Model.h5", compile=False)
 
 
-class_names = ['bright', 'dark', 'generic']
-
-def extract_mel_spectrogram(file_path, duration=4.0, sr=22050):
-    audio, _ = librosa.load(file_path, sr=sr, duration=duration)
-    mel_spec = librosa.feature.melspectrogram(y=audio, sr=sr, n_mels=128, fmax=8000)
-    mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
-    mel_spec_img = Image.fromarray(mel_spec_db).resize((128, 128))
-    mel_spec_img = np.array(mel_spec_img, dtype=np.float32) / 255.0
-    mel_spec_img = mel_spec_img[..., np.newaxis]  
-    return mel_spec_img
-
-def predict_label(mel_spec):
-    mel_spec = np.expand_dims(mel_spec, axis=0)  
-    interpreter.set_tensor(input_details[0]['index'], mel_spec)
-    interpreter.invoke()
-    output_data = interpreter.get_tensor(output_details[0]['index'])
-    predicted_index = np.argmax(output_data)
-    predicted_label = class_names[predicted_index]
-    return predicted_label
+class_names = open("AI/Models/Keras/labels.txt", "r").readlines()
 
 
-file_path = 'WAV/bright/keyboard_acoustic_001-024-025.wav'
 
 
-mel_spec_img = extract_mel_spectrogram(file_path)
+data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
 
-predicted_label = predict_label(mel_spec_img)
-print("Predicted Label:", predicted_label)
+image = Image.open("Train_data/224Mels/bright/sample_27_mel.png").convert("RGB")
 
 
-plt.figure(figsize=(5, 5))
-plt.imshow(mel_spec_img.squeeze(), cmap='gray')
-plt.title('MEL Spectrogram (128x128)')
-plt.axis('off')
-plt.show()
+size = (224, 224)
+image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
+
+
+image_array = np.asarray(image)
+
+
+normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
+
+
+data[0] = normalized_image_array
+
+
+prediction = model.predict(data)
+index = np.argmax(prediction)
+class_name = class_names[index]
+confidence_score = prediction[0][index]
+
+
+print("Class:", class_name[2:], end="")
+print("Confidence Score:", confidence_score)

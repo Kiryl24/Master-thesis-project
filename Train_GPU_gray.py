@@ -4,7 +4,7 @@ from tensorflow.keras import Model, Input
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D, Dense, Dropout, BatchNormalization, \
     Activation, Add
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.regularizers import l2  # Import regularizacji L2
+from tensorflow.keras.regularizers import l2  
 import matplotlib.pyplot as plt
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 
@@ -17,63 +17,63 @@ else:
     print("No GPU found. Using CPU.")
 
 reduce_lr = ReduceLROnPlateau(
-    monitor='val_loss',    # Monitorujemy walidacyjną stratę
-    factor=0.5,            # Zmniejsz współczynnik uczenia o połowę, gdy metryka nie poprawia się
-    patience=3,            # Czekaj 3 epoki bez poprawy, zanim zmniejszysz lr
-    verbose=1,             # Wyświetl komunikaty, gdy zmienia się współczynnik uczenia
-    min_lr=0.00001         # Minimalna wartość współczynnika uczenia
+    monitor='val_loss',    
+    factor=0.5,            
+    patience=3,            
+    verbose=1,             
+    min_lr=0.00001         
 )
 def create_deep_model(input_shape, num_classes):
     inputs = Input(shape=input_shape, name="mel_input")
 
-    # Zastosowanie L2 regularizacji oraz zwiększenie Dropout do 0.6
-    x = Conv2D(32, (3, 3), padding='same', kernel_regularizer=l2(0.01))(inputs)  # Zmieniono na Conv2D z L2 regularizacją
+    
+    x = Conv2D(32, (3, 3), padding='same', kernel_regularizer=l2(0.01))(inputs)  
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Conv2D(32, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  # Zmieniono na Conv2D z L2 regularizacją
+    x = Conv2D(32, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D((2, 2))(x)
-    x = Dropout(0.6)(x)  # Zwiększono Dropout do 0.6
+    x = Dropout(0.6)(x)  
 
-    x = Conv2D(64, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  # Zmieniono na Conv2D z L2 regularizacją
+    x = Conv2D(64, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Conv2D(64, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  # Zmieniono na Conv2D z L2 regularizacją
+    x = Conv2D(64, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D((2, 2))(x)
-    x = Dropout(0.6)(x)  # Zwiększono Dropout do 0.6
+    x = Dropout(0.6)(x)  
 
-    x = Conv2D(128, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  # Zmieniono na Conv2D z L2 regularizacją
+    x = Conv2D(252, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Conv2D(128, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  # Zmieniono na Conv2D z L2 regularizacją
+    x = Conv2D(252, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D((2, 2))(x)
-    x = Dropout(0.6)(x)  # Zwiększono Dropout do 0.6
+    x = Dropout(0.6)(x)  
 
     shortcut = x
-    x = Conv2D(128, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  # Zmieniono na Conv2D z L2 regularizacją
+    x = Conv2D(252, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    x = Conv2D(128, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  # Zmieniono na Conv2D z L2 regularizacją
+    x = Conv2D(252, (3, 3), padding='same', kernel_regularizer=l2(0.01))(x)  
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
 
-    shortcut = Conv2D(128, (1, 1), padding='same', kernel_regularizer=l2(0.01))(shortcut)  # Zmieniono na Conv2D z L2 regularizacją
+    shortcut = Conv2D(252, (1, 1), padding='same', kernel_regularizer=l2(0.01))(shortcut)  
     shortcut = BatchNormalization()(shortcut)
 
     x = Add()([x, shortcut])
     x = MaxPooling2D((2, 2))(x)
-    x = Dropout(0.6)(x)  # Zwiększono Dropout do 0.6
+    x = Dropout(0.6)(x)  
 
     x = GlobalAveragePooling2D()(x)
     x = Dense(512, activation='relu')(x)
-    x = Dropout(0.6)(x)  # Zwiększono Dropout do 0.6
-    x = Dense(128, activation='relu')(x)
-    x = Dropout(0.6)(x)  # Zwiększono Dropout do 0.6
+    x = Dropout(0.6)(x)  
+    x = Dense(252, activation='relu')(x)
+    x = Dropout(0.6)(x)  
 
     outputs = Dense(num_classes, activation='softmax', name="output")(x)
 
@@ -81,7 +81,7 @@ def create_deep_model(input_shape, num_classes):
     return model
 
 
-mel_image_shape = (128, 128, 1)
+mel_image_shape = (252, 252, 1)
 num_classes = 3
 
 model = create_deep_model(mel_image_shape, num_classes)
@@ -92,13 +92,13 @@ model.compile(optimizer=Adam(learning_rate=0.00003),
 
 model.summary()
 
-mel_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1. / 255)  # Poprawiona wartość skali
-mel_train_dir = 'Train_data/128Mels'
+mel_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1. / 255)  
+mel_train_dir = 'Train_data/252Mels'
 
 mel_generator = mel_datagen.flow_from_directory(
     mel_train_dir,
-    target_size=(128, 128),
-    color_mode='rgb',
+    target_size=(252, 252),
+    color_mode='grayscale',
     batch_size=8,
     class_mode='sparse',
     shuffle=True
@@ -107,7 +107,7 @@ mel_generator = mel_datagen.flow_from_directory(
 dataset = tf.data.Dataset.from_generator(
     lambda: mel_generator,
     output_signature=(
-        tf.TensorSpec(shape=(None, 128, 128, 1), dtype=tf.float32),
+        tf.TensorSpec(shape=(None, 252, 252, 1), dtype=tf.float32),
         tf.TensorSpec(shape=(None,), dtype=tf.int32)
     )
 )
@@ -118,7 +118,7 @@ history = model.fit(
     epochs=50,
     validation_data=dataset,
     validation_steps=len(mel_generator),
-    callbacks=[reduce_lr]  # Dodajemy callback
+    callbacks=[reduce_lr]  
 )
 
 plt.figure(figsize=(12, 6))
