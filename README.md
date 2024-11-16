@@ -24,6 +24,8 @@ ML determines sound color based on analysis of MEL-Spectrograms. Data is generat
 
 Used neural net: CNN
 
+Model generated from: https://teachablemachine.withgoogle.com/
+
 Data is processed by image recognition.
 
 For Raspberry application, we need to have python installed. Needed libraries:
