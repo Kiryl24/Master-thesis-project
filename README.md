@@ -30,9 +30,11 @@ Data is processed by image recognition.
 
 For Raspberry application, we need to have python installed. Needed libraries:
 
+sudo apt update
+sudo apt install libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libsdl2-mixer-dev
+
 sudo apt-get install ffmpeg
 
-sudo apt update
 sudo apt install portaudio19-dev
 
 pip3 install tensorflow numpy librosa sounddevice matplotlib pillow kivy ffmpeg-python tflite-runtime
