@@ -32,8 +32,10 @@ For Raspberry application, we need to have python installed. Needed libraries:
 
 sudo apt-get install ffmpeg
 
-pip3 install tensorflow numpy librosa sounddevice matplotlib pillow ffpyplayer kivy ffmpeg-python
+pip3 install tensorflow numpy librosa sounddevice matplotlib pillow kivy ffmpeg-python 
 
+ffpyplayer and kivy: https://gist.github.com/P1kachu/65dceb8252f277d68229ad6e8df99c69
+ 
 Graphic interface will be written using Kivy:  https://kivy.org/doc/stable/installation/installation-rpi.html , https://kivy.org/doc/stable/gettingstarted/installation.html#installation-canonical 
 
 Animations will be made with Synfig.
