@@ -1,0 +1,3 @@
+0 Bright
+1 Soft
+2 Generic
