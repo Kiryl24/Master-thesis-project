@@ -30,6 +30,8 @@ Data is processed by image recognition.
 
 For Raspberry application, we need to have python installed. Needed libraries:
 
+sudo apt-get install ffmpeg
+
 pip3 install tensorflow librosa sounddevice matplotlib pillow ffpyplayer kivy 
 
 
