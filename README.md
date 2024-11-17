@@ -35,6 +35,8 @@ sudo apt-get install ffmpeg
 pip3 install tensorflow numpy librosa sounddevice matplotlib pillow kivy ffmpeg-python 
 
 ffpyplayer and kivy: https://gist.github.com/P1kachu/65dceb8252f277d68229ad6e8df99c69
+
+GStream is needed.
  
 Graphic interface will be written using Kivy:  https://kivy.org/doc/stable/installation/installation-rpi.html , https://kivy.org/doc/stable/gettingstarted/installation.html#installation-canonical 
 
