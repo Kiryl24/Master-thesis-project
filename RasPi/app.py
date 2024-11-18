@@ -1,4 +1,5 @@
 import os
+
 os.environ["KIVY_VIDEO"] = "ffpyplayer"
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -19,6 +20,7 @@ import matplotlib.pyplot as plt
 from kivy.clock import Clock
 import soundfile as sf
 from kivy.config import Config
+
 Config.set('graphics', 'width', '480')
 Config.set('graphics', 'height', '320')
 Config.set('graphics', 'borderless', '1')
@@ -27,8 +29,7 @@ Config.set('graphics', 'resizable', '0')
 if not os.path.exists('temp'):
     os.makedirs('temp')
 
-
-interpreter = tf.lite.Interpreter(model_path="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/model_96_TM.tflite")
+interpreter = tf.lite.Interpreter(model_path="model_96_TM.tflite")
 interpreter.allocate_tensors()
 class_names = open("labels.txt", "r").readlines()
 input_details = interpreter.get_input_details()
@@ -40,32 +41,88 @@ def record_audio(duration=4, sample_rate=22050):
     sd.wait()
     return audio_data.flatten()
 
+
 def create_mel_spectrogram(audio, sample_rate=22050):
-    mel_spec = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_mels=224, fmax=8000)
-    return librosa.power_to_db(mel_spec, ref=np.max)
+    mel_spec = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_mels=128, fmax=8000)
+    mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-def save_spectrogram(image, filename, colormap='hot'):
-    plt.figure(figsize=(224, 224), dpi=100)
-    plt.axis('off')
-    plt.imshow(image, cmap=colormap, aspect='auto')
-    plt.savefig(filename, bbox_inches='tight', pad_inches=0)
-    plt.close()
+    mel_spec_db_flipped = np.flip(mel_spec_db, axis=0)
 
-def save_grayscale_spectrogram(image, filename, size=(96, 96)):
-    grayscale_image = ImageOps.grayscale(PilImage.fromarray(image))
-    grayscale_image = grayscale_image.resize(size)
-    grayscale_image.save(filename)
+    mel_spec_path_128x128 = os.path.join("temp", "mel_spec_128x128.png")
+
+    try:
+        dir_name = os.path.dirname(mel_spec_path_128x128)
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+
+        save_spectrogram(mel_spec_db_flipped, mel_spec_path_128x128, colormap='viridis')
+        print(f"Spectrogram saved at {mel_spec_path_128x128}")
+    except Exception as e:
+        print(f"Error creating or saving spectrogram: {e}")
+
+    return mel_spec_path_128x128
+
+
+def save_spectrogram(image, filename, colormap='viridis'):
+    try:
+        plt.figure(figsize=(1.9, 1.9), dpi=85)
+        plt.axis('off')
+        plt.imshow(image, cmap=colormap, aspect='auto')
+        plt.savefig(filename, bbox_inches='tight', pad_inches=0)
+        plt.close()
+
+        print(f"Spectrogram saved at {filename}")
+    except Exception as e:
+        print(f"Error saving spectrogram: {e}")
 
 def predict_label(mel_image):
-    mel_image = mel_image.convert("L").resize((96, 96))
-    mel_array = img_to_array(mel_image).astype('float32') / 127.5 - 1
-    mel_array = np.expand_dims(mel_array, axis=0)
-    interpreter.set_tensor(input_details[0]['index'], mel_array)
+    np.set_printoptions(suppress=True)
+
+    
+    interpreter = tf.lite.Interpreter(model_path="model_96_TM.tflite")
+    interpreter.allocate_tensors()
+
+    
+    class_names = open("labels.txt", "r").readlines()
+
+    
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    mel_image = mel_image.convert('L')
+    mel_image = mel_image.resize((96, 96))
+    
+    image_array = np.asarray(mel_image)
+
+    
+    normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
+
+    
+    normalized_image_array = np.expand_dims(normalized_image_array, axis=-1)
+
+    
+    data = np.ndarray(shape=(1, 96, 96, 1), dtype=np.float32)
+    data[0] = normalized_image_array
+
+    
+    input_index = input_details[0]['index']
+    interpreter.set_tensor(input_index, data)
+
+    
     interpreter.invoke()
-    predictions = interpreter.get_tensor(output_details[0]['index'])
-    predicted_label = np.argmax(predictions)
-    confidence_score = predictions[0][predicted_label]
-    class_name = class_names[predicted_label].strip()[1:]
+
+    
+    output_index = output_details[0]['index']
+    prediction = interpreter.get_tensor(output_index)
+
+    
+    index = np.argmax(prediction)
+    class_name = class_names[index].strip()[1:]
+    confidence_score = prediction[0][index]
+
+    
+    print(f"Color: {class_name}")
+    print(f"Confidence Score: {confidence_score}")
+
     return class_name, confidence_score
 
 class MainApp(BoxLayout):
@@ -91,6 +148,7 @@ class MainApp(BoxLayout):
         self.add_widget(self.right_panel)
 
     def run_ai_script(self, instance):
+
         self.cleanup_temp_files()
         Thread(target=self.process_audio).start()
 
@@ -105,43 +163,46 @@ class MainApp(BoxLayout):
             temp_wav_path = "temp/temp.wav"
             sf.write(temp_wav_path, audio_data, 22050)
 
-            self.update_logs("Generating spectrogram...")
-            mel_spec = create_mel_spectrogram(audio_data)
+            self.update_logs("Generating spectrograms...")
+            mel_spec_path_128x128 = create_mel_spectrogram(audio_data)
 
-            # Zmiana: użycie Clock.schedule_once do generowania spektrogramu w głównym wątku
-            Clock.schedule_once(lambda dt: self.save_spectrogram_and_update(mel_spec))
 
             self.update_logs("Predicting label...")
-            mel_image = PilImage.fromarray(mel_spec)
+            mel_image = PilImage.open(mel_spec_path_128x128)
+            self.update_spectrogram(mel_spec_path_128x128)
+            print(f"Image size: {mel_image.size}")
             class_name, confidence_score = predict_label(mel_image)
-            self.update_logs(f"Predicted: {class_name} ({confidence_score * 100:.2f}%)")
+            self.update_logs(f"Color: {class_name}\n{confidence_score * 100:.2f}%")
         except Exception as e:
-            self.update_logs(f"Couldn't record audio,\n please try again.\n{e} ")
+            print(f"{e}")
+            self.update_logs(f"Error processing audio:\n{e}")
 
-    def save_spectrogram_and_update(self, mel_spec):
-        temp_spectrogram_path = "temp/mel_spec_224x224.png"
-        save_spectrogram(mel_spec, temp_spectrogram_path)
-        temp_grayscale_path = "temp/mel_spec_96x96.png"
-        save_grayscale_spectrogram(mel_spec, temp_grayscale_path)
 
-        self.update_spectrogram(temp_spectrogram_path)
 
     def update_logs(self, text):
         self.logs.text = text
 
     def update_spectrogram(self, image_path):
-        self.spectrogram_image.source = image_path
-        self.spectrogram_image.reload()
+        try:
+            if os.path.exists(image_path):
+                self.spectrogram_image.source = image_path
+                self.spectrogram_image.reload()  # Force a reload of the image
+                print(f"Spectrogram updated with image from {image_path}")
+            else:
+                print(f"File not found: {image_path}")
+        except Exception as e:
+            print(f"Error updating spectrogram: {e}")
 
     def cleanup_temp_files(self):
-        temp_files = ["temp/temp.wav", "temp/mel_spec_224x224.png", "temp/mel_spec_96x96.png"]
+
+        temp_files = ["temp/temp.wav", "temp/mel_spec_128x128.png", "temp/mel_spec_96x96.png"]
         for file in temp_files:
             if os.path.exists(file):
                 os.remove(file)
 
     def show_intro_popup(self):
         intro_video = Video(
-            source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/intro.mp4",
+            source="intro.mp4",
             size_hint=(None, None),
             size=(480, 320),
             state='play'
@@ -154,10 +215,10 @@ class MainApp(BoxLayout):
         )
         popup.open()
         intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
-        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 10)
+        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 6)
 
     def show_help_video(self, instance):
-        help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
+        help_video = Video(source="PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
@@ -168,11 +229,13 @@ class MainApp(BoxLayout):
         video.state = 'stop'
         video.unload()
 
+
 class SpectrogramApp(App):
     def build(self):
         app_layout = MainApp()
         Clock.schedule_once(lambda dt: app_layout.show_intro_popup(), 0.1)
         return app_layout
+
 
 if __name__ == "__main__":
     SpectrogramApp().run()
