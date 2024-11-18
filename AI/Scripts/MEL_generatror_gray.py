@@ -6,7 +6,7 @@ from PIL import Image
 
 224
 source_audio_folder = "WAV"
-mel_output_folder = "Train_data/224Mels_gray"
+mel_output_folder = "Train_data/224Mels_gray_signed"
 
 soft_folder = os.path.join(mel_output_folder, "soft")
 bright_folder = os.path.join(mel_output_folder, "bright")

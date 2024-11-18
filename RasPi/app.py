@@ -38,48 +38,44 @@ input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
 
-def record_audio(duration=4, sample_rate=22050):
+def record_audio(duration=4, sample_rate=44100):
     audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
     sd.wait()
+    # Normalizacja audio do zakresu -1.0 do 1.0
+    audio_data = audio_data / np.max(np.abs(audio_data))
     return audio_data.flatten()
 
 
-def create_mel_spectrogram(audio, sample_rate=22050):
-    mel_spec = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_mels=128, fmax=8000)
+
+
+def create_mel_spectrogram(audio, sample_rate=44100):
+    mel_spec = librosa.feature.melspectrogram(
+        y=audio,
+        sr=sample_rate,
+        n_mels=224,
+        fmin=100,  # Minimalna częstotliwość
+        fmax=10000,  # Maksymalna częstotliwość
+        n_fft=2024,  # Rozmiar okna FFT
+        hop_length=512  # Zwiększony, aby dopasować długość do analizy
+    )
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
+    # Obrót osi dla poprawnej orientacji wizualnej
     mel_spec_db_flipped = np.flip(mel_spec_db, axis=0)
 
-    mel_spec_path_128x128 = os.path.join("temp", "mel_spec_128x128.png")
-
-    try:
-        dir_name = os.path.dirname(mel_spec_path_128x128)
-        if not os.path.exists(dir_name):
-            os.makedirs(dir_name)
-
-        save_spectrogram(mel_spec_db_flipped, mel_spec_path_128x128, colormap='viridis')
-        print(f"Spectrogram saved at {mel_spec_path_128x128}")
-    except Exception as e:
-        print(f"Error creating or saving spectrogram: {e}")
+    # Zapis spektrogramu jako obraz w rozmiarze 96x96
+    mel_spec_path_128x128 = os.path.join("temp", "mel_spec_96x96.png")
+    plt.figure(figsize=(8.5, 8.5), dpi=128)  # Dostosowanie rozmiaru obrazu
+    plt.axis('off')
+    plt.imshow(mel_spec_db_flipped, cmap='viridis', aspect='auto', origin='lower')
+    plt.savefig(mel_spec_path_128x128, bbox_inches='tight', pad_inches=0)
+    plt.close()
 
     return mel_spec_path_128x128
 
 
-def save_spectrogram(image, filename, colormap='viridis'):
-    try:
-        plt.figure(figsize=(4, 4), dpi=128)
-        plt.axis('off')
-        plt.imshow(image, cmap=colormap, aspect='auto')
-        plt.savefig(filename, bbox_inches='tight', pad_inches=0)
-        plt.close()
 
-        print(f"Spectrogram saved at {filename}")
-    except Exception as e:
-        print(f"Error saving spectrogram: {e}")
-        
-        print(f"Image shape: {image.shape}")
-        plt.imshow(image, cmap=colormap)
-        plt.show()
+
 
 def predict_label(mel_image):
     np.set_printoptions(suppress=True)
@@ -167,7 +163,7 @@ class MainApp(BoxLayout):
             self.update_logs("Recording...")
             audio_data = record_audio()
             temp_wav_path = "temp/temp.wav"
-            sf.write(temp_wav_path, audio_data, 22050)
+            sf.write(temp_wav_path, audio_data, 44100)
 
             self.update_logs("Generating spectrograms...")
             mel_spec_path_128x128 = create_mel_spectrogram(audio_data)
