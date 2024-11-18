@@ -17,7 +17,7 @@ from PIL import Image as PilImage, ImageOps
 from tensorflow.keras.preprocessing.image import img_to_array
 import matplotlib.pyplot as plt
 from kivy.clock import Clock
-
+import soundfile as sf
 from kivy.config import Config
 Config.set('graphics', 'width', '480')
 Config.set('graphics', 'height', '320')
@@ -94,6 +94,7 @@ class MainApp(BoxLayout):
     def run_ai_script(self, instance):
         self.cleanup_temp_files()
         Thread(target=self.process_audio).start()
+
     def process_audio(self):
         try:
             for i in range(3, 0, -1):
@@ -103,7 +104,8 @@ class MainApp(BoxLayout):
             self.update_logs("Recording...")
             audio_data = record_audio()
             temp_wav_path = "temp/temp.wav"
-            librosa.output.write_wav(temp_wav_path, audio_data, sr=22050)
+            
+            sf.write(temp_wav_path, audio_data, 22050)
 
             self.update_logs("Generating spectrogram...")
             mel_spec = create_mel_spectrogram(audio_data)
@@ -150,14 +152,14 @@ class MainApp(BoxLayout):
         )
         popup.open()
         intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
-        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 10)  
+        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 10)
 
     def show_help_video(self, instance):
         help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
-        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 6)  
+        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 6)
 
     def close_video(self, popup, video):
         popup.dismiss()
@@ -169,5 +171,6 @@ class SpectrogramApp(App):
         app_layout = MainApp()
         Clock.schedule_once(lambda dt: app_layout.show_intro_popup(), 0.1)
         return app_layout
+
 if __name__ == "__main__":
     SpectrogramApp().run()
