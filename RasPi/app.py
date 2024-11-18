@@ -71,7 +71,6 @@ def predict_label(mel_image):
 class MainApp(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation='horizontal', **kwargs)
-
         self.left_panel = BoxLayout(orientation='vertical', size_hint=(0.6, 1))
         self.spectrogram_image = Image()
         self.left_panel.add_widget(self.spectrogram_image)
@@ -104,18 +103,13 @@ class MainApp(BoxLayout):
             self.update_logs("Recording...")
             audio_data = record_audio()
             temp_wav_path = "temp/temp.wav"
-            
             sf.write(temp_wav_path, audio_data, 22050)
 
             self.update_logs("Generating spectrogram...")
             mel_spec = create_mel_spectrogram(audio_data)
-            temp_spectrogram_path = "temp/mel_spec_128x128.png"
-            save_spectrogram(mel_spec, temp_spectrogram_path)
 
-            temp_grayscale_path = "temp/mel_spec_96x96.png"
-            save_grayscale_spectrogram(mel_spec, temp_grayscale_path)
-
-            self.update_spectrogram(temp_spectrogram_path)
+            # Zmiana: użycie Clock.schedule_once do generowania spektrogramu w głównym wątku
+            Clock.schedule_once(lambda dt: self.save_spectrogram_and_update(mel_spec))
 
             self.update_logs("Predicting label...")
             mel_image = PilImage.fromarray(mel_spec)
@@ -123,6 +117,14 @@ class MainApp(BoxLayout):
             self.update_logs(f"Predicted: {class_name} ({confidence_score * 100:.2f}%)")
         except Exception as e:
             self.update_logs(f"Couldn't record audio,\n please try again.\n{e} ")
+
+    def save_spectrogram_and_update(self, mel_spec):
+        temp_spectrogram_path = "temp/mel_spec_128x128.png"
+        save_spectrogram(mel_spec, temp_spectrogram_path)
+        temp_grayscale_path = "temp/mel_spec_96x96.png"
+        save_grayscale_spectrogram(mel_spec, temp_grayscale_path)
+
+        self.update_spectrogram(temp_spectrogram_path)
 
     def update_logs(self, text):
         self.logs.text = text
