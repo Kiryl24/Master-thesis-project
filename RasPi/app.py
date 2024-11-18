@@ -75,6 +75,8 @@ class MainApp(BoxLayout):
         self.left_panel = BoxLayout(orientation='vertical', size_hint=(0.6, 1))
         self.spectrogram_image = Image()
         self.left_panel.add_widget(self.spectrogram_image)
+        self.spectrogram_image.size_hint = (None, None)
+        self.spectrogram_image.size = (224, 224)  
 
         self.right_panel = BoxLayout(orientation='vertical', size_hint=(0.4, 1))
         self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2))
