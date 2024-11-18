@@ -65,7 +65,7 @@ def predict_label(mel_image):
     predictions = interpreter.get_tensor(output_details[0]['index'])
     predicted_label = np.argmax(predictions)
     confidence_score = predictions[0][predicted_label]
-    class_name = class_names[predicted_label].strip()
+    class_name = class_names[predicted_label].strip()[1:]
     return class_name, confidence_score
 
 class MainApp(BoxLayout):

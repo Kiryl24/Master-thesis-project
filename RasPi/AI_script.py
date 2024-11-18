@@ -3,7 +3,7 @@ import time
 import numpy as np
 import sounddevice as sd
 import librosa
-import soundfile as sf  
+import soundfile as sf
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
@@ -15,7 +15,8 @@ if not os.path.exists('temp'):
 interpreter = tf.lite.Interpreter(model_path="model_96_TM.tflite")
 interpreter.allocate_tensors()
 
-class_names = open("labels.txt", "r").readlines()
+class_names = open("labels.txt", "r").readlines()[1:]
+
 
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
@@ -70,7 +71,7 @@ while True:
     audio_data = record_audio()
 
     temp_wav_path = "temp/temp.wav"
-    
+
     sf.write(temp_wav_path, audio_data, 22050)
 
     mel_spec = create_mel_spectrogram(audio_data)
