@@ -16,12 +16,12 @@ import tensorflow as tf
 from PIL import Image as PilImage, ImageOps
 from tensorflow.keras.preprocessing.image import img_to_array
 import matplotlib.pyplot as plt
-from kivy.clock import Clock  
+from kivy.clock import Clock
 
 from kivy.config import Config
 Config.set('graphics', 'width', '480')
 Config.set('graphics', 'height', '320')
-Config.set('graphics', 'borderless', '1')  
+Config.set('graphics', 'borderless', '1')
 Config.set('graphics', 'resizable', '0')
 
 if not os.path.exists('temp'):
@@ -70,16 +70,7 @@ def predict_label(mel_image):
 
 class MainApp(BoxLayout):
     def __init__(self, **kwargs):
-        super().__init__(orientation='vertical', **kwargs)
-
-        
-        self.intro_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/intro.mp4", 
-                                 size_hint=(1, 0.6), state='play')
-        self.add_widget(self.intro_video)
-        self.intro_video.bind(on_stop=self.on_intro_video_end)
-
-        
-        self.bottom_panel = BoxLayout(orientation='horizontal', size_hint=(1, 0.4))
+        super().__init__(orientation='horizontal', **kwargs)
 
         self.left_panel = BoxLayout(orientation='vertical', size_hint=(0.6, 1))
         self.spectrogram_image = Image()
@@ -97,25 +88,10 @@ class MainApp(BoxLayout):
         self.logs = Label(text="", size_hint=(1, 0.6))
         self.right_panel.add_widget(self.logs)
 
-        self.bottom_panel.add_widget(self.left_panel)
-        self.bottom_panel.add_widget(self.right_panel)
+        self.add_widget(self.left_panel)
+        self.add_widget(self.right_panel)
 
-        self.add_widget(self.bottom_panel)
-
-    def on_intro_video_end(self, instance):
-        self.remove_widget(self.intro_video)  
-        self.intro_video.unload()  
-
-    def show_help_video(self, instance):
-        
-        self.help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", 
-                                size_hint=(1, 0.6), state='play')
-        self.add_widget(self.help_video)
-        self.help_video.bind(on_stop=self.on_help_video_end)
-
-    def on_help_video_end(self, instance):
-        self.remove_widget(self.help_video)  
-        self.help_video.unload()  
+        self.play_intro_animation()
 
     def run_ai_script(self, instance):
         self.cleanup_temp_files()
@@ -147,7 +123,7 @@ class MainApp(BoxLayout):
             class_name, confidence_score = predict_label(mel_image)
             self.update_logs(f"Predicted: {class_name} ({confidence_score * 100:.2f}%)")
         except Exception as e:
-            self.update_logs(f"Couldn't record audio,\nplease try again.")
+            self.update_logs(f"Error: {str(e)}")
 
     def update_logs(self, text):
         self.logs.text = text
@@ -162,23 +138,38 @@ class MainApp(BoxLayout):
             if os.path.exists(file):
                 os.remove(file)
 
+    def play_intro_animation(self):
+        intro_video = Video(
+            source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/intro.mp4",
+            size_hint=(None, None),
+            size=(480, 320),
+            state='play'
+        )
+        popup = Popup(
+            title="Intro",
+            content=intro_video,
+            size_hint=(None, None),
+            size=(480, 320)
+        )
+        popup.open()
+        intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
+        
+        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 6)
     def show_help_video(self, instance):
-        help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4",
-                           size_hint=(1, 1), state='play')
+        help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
+        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 6)  
 
     def close_video(self, popup, video):
         popup.dismiss()
         video.state = 'stop'
         video.unload()
 
-
 class SpectrogramApp(App):
     def build(self):
         return MainApp()
-
 
 if __name__ == "__main__":
     SpectrogramApp().run()
