@@ -20,19 +20,18 @@ import matplotlib.pyplot as plt
 from kivy.config import Config
 Config.set('graphics', 'width', '480')
 Config.set('graphics', 'height', '320')
-Config.set('graphics', 'borderless', '1')  # Make the window borderless
+Config.set('graphics', 'borderless', '1')  
 Config.set('graphics', 'resizable', '0')
 
 if not os.path.exists('temp'):
     os.makedirs('temp')
 
 
-interpreter = tf.lite.Interpreter(model_path="model_96_TM.tflite")
+interpreter = tf.lite.Interpreter(model_path="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/model_96_TM.tflite")
 interpreter.allocate_tensors()
 class_names = open("labels.txt", "r").readlines()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
-
 
 
 def record_audio(duration=4, sample_rate=22050):
@@ -40,27 +39,21 @@ def record_audio(duration=4, sample_rate=22050):
     sd.wait()
     return audio_data.flatten()
 
-
 def create_mel_spectrogram(audio, sample_rate=22050):
     mel_spec = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_mels=128, fmax=8000)
     return librosa.power_to_db(mel_spec, ref=np.max)
 
-
-def save_spectrogram(image, filename, size=(128, 128), colormap='viridis'):
-
+def save_spectrogram(image, filename, colormap='viridis'):
     plt.figure(figsize=(1.28, 1.28), dpi=100)
     plt.axis('off')
     plt.imshow(image, cmap=colormap, aspect='auto')
     plt.savefig(filename, bbox_inches='tight', pad_inches=0)
     plt.close()
 
-
 def save_grayscale_spectrogram(image, filename, size=(96, 96)):
-
     grayscale_image = ImageOps.grayscale(PilImage.fromarray(image))
     grayscale_image = grayscale_image.resize(size)
     grayscale_image.save(filename)
-
 
 def predict_label(mel_image):
     mel_image = mel_image.convert("L").resize((96, 96))
@@ -79,19 +72,15 @@ class MainApp(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation='horizontal', **kwargs)
 
-
+        
         self.left_panel = BoxLayout(orientation='vertical', size_hint=(0.6, 1))
         self.spectrogram_image = Image()
         self.left_panel.add_widget(self.spectrogram_image)
 
-
         self.right_panel = BoxLayout(orientation='vertical', size_hint=(0.4, 1))
-
-
         self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2))
         self.button_analyze.bind(on_press=self.run_ai_script)
         self.right_panel.add_widget(self.button_analyze)
-
 
         self.button_help = Button(text="Help", size_hint=(1, 0.2), background_color=(1, 0, 0, 1))
         self.button_help.bind(on_press=self.show_help_video)
@@ -103,7 +92,7 @@ class MainApp(BoxLayout):
         self.add_widget(self.left_panel)
         self.add_widget(self.right_panel)
 
-
+        
         self.play_intro_animation()
 
     def run_ai_script(self, instance):
@@ -126,7 +115,6 @@ class MainApp(BoxLayout):
             temp_spectrogram_path = "temp/mel_spec_128x128.png"
             save_spectrogram(mel_spec, temp_spectrogram_path)
 
-
             temp_grayscale_path = "temp/mel_spec_96x96.png"
             save_grayscale_spectrogram(mel_spec, temp_grayscale_path)
 
@@ -137,10 +125,9 @@ class MainApp(BoxLayout):
             class_name, confidence_score = predict_label(mel_image)
             self.update_logs(f"Predicted: {class_name} ({confidence_score * 100:.2f}%)")
         except Exception as e:
-            self.update_logs(f"Couldn't process sound,\n please try again")
+            self.update_logs(f"Error: {str(e)}")
 
     def update_logs(self, text):
-
         self.logs.text = text
 
     def update_spectrogram(self, image_path):
@@ -152,43 +139,27 @@ class MainApp(BoxLayout):
         for file in temp_files:
             if os.path.exists(file):
                 os.remove(file)
-                self.update_logs(f"Removed {file}")
 
     def play_intro_animation(self):
-
-        intro_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/intro.mp4", size=(480, 320), state='play')
-
-
-        popup = Popup(title="Intro", content=intro_video, size=(480, 320))
+        intro_video = Video(source="/path/to/intro.mp4", size_hint=(None, None), size=(480, 320), state='play')
+        popup = Popup(title="Intro", content=intro_video, size_hint=(None, None), size=(480, 320))
         popup.open()
-
-
-        intro_video.bind(on_stop=lambda instance: self.close_intro_video(popup))
-
-    def close_intro_video(self, popup):
-
-        popup.dismiss()
+        intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
 
     def show_help_video(self, instance):
-
-        help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size=(480, 320), state='play')
-
-
-        popup = Popup(title="Help", content=help_video, size=(480, 320))
+        help_video = Video(source="/path/to/help.mp4", size_hint=(None, None), size=(480, 320), state='play')
+        popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
         popup.open()
+        help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
 
-
-        help_video.bind(on_stop=lambda instance: self.close_help_video(popup))
-
-    def close_help_video(self, popup):
-
+    def close_video(self, popup, video):
         popup.dismiss()
-
+        video.state = 'stop'
+        video.unload()
 
 class SpectrogramApp(App):
     def build(self):
         return MainApp()
-
 
 if __name__ == "__main__":
     SpectrogramApp().run()
