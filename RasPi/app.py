@@ -91,12 +91,9 @@ class MainApp(BoxLayout):
         self.add_widget(self.left_panel)
         self.add_widget(self.right_panel)
 
-        self.play_intro_animation()
-
     def run_ai_script(self, instance):
         self.cleanup_temp_files()
         Thread(target=self.process_audio).start()
-
     def process_audio(self):
         try:
             for i in range(3, 0, -1):
@@ -138,7 +135,7 @@ class MainApp(BoxLayout):
             if os.path.exists(file):
                 os.remove(file)
 
-    def play_intro_animation(self):
+    def show_intro_popup(self):
         intro_video = Video(
             source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/intro.mp4",
             size_hint=(None, None),
@@ -146,15 +143,15 @@ class MainApp(BoxLayout):
             state='play'
         )
         popup = Popup(
-            title="Intro",
+            title="Welcome!",
             content=intro_video,
             size_hint=(None, None),
             size=(480, 320)
         )
         popup.open()
         intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
-        
-        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 10)
+        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 10)  
+
     def show_help_video(self, instance):
         help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
@@ -169,7 +166,8 @@ class MainApp(BoxLayout):
 
 class SpectrogramApp(App):
     def build(self):
-        return MainApp()
-
+        app_layout = MainApp()
+        Clock.schedule_once(lambda dt: app_layout.show_intro_popup(), 0.1)
+        return app_layout
 if __name__ == "__main__":
     SpectrogramApp().run()
