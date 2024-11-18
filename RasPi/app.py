@@ -156,7 +156,7 @@ class MainApp(BoxLayout):
 
     def play_intro_animation(self):
         
-        intro_video = Video(source="intro.mp4", size=(480, 320), state='play')
+        intro_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/intro.mp4", size=(480, 320), state='play')
 
         
         popup = Popup(title="Intro", content=intro_video, size=(480, 320))
@@ -171,7 +171,7 @@ class MainApp(BoxLayout):
 
     def show_help_video(self, instance):
         
-        help_video = Video(source="pianoinstruction.mp4", size=(480, 320), state='play')
+        help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size=(480, 320), state='play')
 
         
         popup = Popup(title="Help", content=help_video, size=(480, 320))
