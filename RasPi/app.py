@@ -1,6 +1,5 @@
 import os
 os.environ["KIVY_VIDEO"] = "ffpyplayer"
-from kivy.config import Config
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -18,10 +17,11 @@ from PIL import Image as PilImage, ImageOps
 from tensorflow.keras.preprocessing.image import img_to_array
 import matplotlib.pyplot as plt
 
-
+from kivy.config import Config
 Config.set('graphics', 'width', '480')
 Config.set('graphics', 'height', '320')
-
+Config.set('graphics', 'borderless', '1')  # Make the window borderless
+Config.set('graphics', 'resizable', '0')
 
 if not os.path.exists('temp'):
     os.makedirs('temp')
@@ -47,7 +47,7 @@ def create_mel_spectrogram(audio, sample_rate=22050):
 
 
 def save_spectrogram(image, filename, size=(128, 128), colormap='viridis'):
-    
+
     plt.figure(figsize=(1.28, 1.28), dpi=100)
     plt.axis('off')
     plt.imshow(image, cmap=colormap, aspect='auto')
@@ -56,7 +56,7 @@ def save_spectrogram(image, filename, size=(128, 128), colormap='viridis'):
 
 
 def save_grayscale_spectrogram(image, filename, size=(96, 96)):
-    
+
     grayscale_image = ImageOps.grayscale(PilImage.fromarray(image))
     grayscale_image = grayscale_image.resize(size)
     grayscale_image.save(filename)
@@ -79,21 +79,21 @@ class MainApp(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation='horizontal', **kwargs)
 
-        
+
         self.left_panel = BoxLayout(orientation='vertical', size_hint=(0.6, 1))
         self.spectrogram_image = Image()
         self.left_panel.add_widget(self.spectrogram_image)
 
-        
+
         self.right_panel = BoxLayout(orientation='vertical', size_hint=(0.4, 1))
 
-        
+
         self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2))
         self.button_analyze.bind(on_press=self.run_ai_script)
         self.right_panel.add_widget(self.button_analyze)
 
-        
-        self.button_help = Button(text="Help", size_hint=(1, 0.2), background_color=(1, 0, 0, 1))  
+
+        self.button_help = Button(text="Help", size_hint=(1, 0.2), background_color=(1, 0, 0, 1))
         self.button_help.bind(on_press=self.show_help_video)
         self.right_panel.add_widget(self.button_help)
 
@@ -103,7 +103,7 @@ class MainApp(BoxLayout):
         self.add_widget(self.left_panel)
         self.add_widget(self.right_panel)
 
-        
+
         self.play_intro_animation()
 
     def run_ai_script(self, instance):
@@ -126,7 +126,7 @@ class MainApp(BoxLayout):
             temp_spectrogram_path = "temp/mel_spec_128x128.png"
             save_spectrogram(mel_spec, temp_spectrogram_path)
 
-            
+
             temp_grayscale_path = "temp/mel_spec_96x96.png"
             save_grayscale_spectrogram(mel_spec, temp_grayscale_path)
 
@@ -140,7 +140,7 @@ class MainApp(BoxLayout):
             self.update_logs(f"Couldn't process sound,\n please try again")
 
     def update_logs(self, text):
-        
+
         self.logs.text = text
 
     def update_spectrogram(self, image_path):
@@ -155,33 +155,33 @@ class MainApp(BoxLayout):
                 self.update_logs(f"Removed {file}")
 
     def play_intro_animation(self):
-        
+
         intro_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/intro.mp4", size=(480, 320), state='play')
 
-        
+
         popup = Popup(title="Intro", content=intro_video, size=(480, 320))
         popup.open()
 
-        
+
         intro_video.bind(on_stop=lambda instance: self.close_intro_video(popup))
 
     def close_intro_video(self, popup):
-        
+
         popup.dismiss()
 
     def show_help_video(self, instance):
-        
+
         help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size=(480, 320), state='play')
 
-        
+
         popup = Popup(title="Help", content=help_video, size=(480, 320))
         popup.open()
 
-        
+
         help_video.bind(on_stop=lambda instance: self.close_help_video(popup))
 
     def close_help_video(self, popup):
-        
+
         popup.dismiss()
 
 
