@@ -123,7 +123,7 @@ class MainApp(BoxLayout):
             class_name, confidence_score = predict_label(mel_image)
             self.update_logs(f"Predicted: {class_name} ({confidence_score * 100:.2f}%)")
         except Exception as e:
-            self.update_logs(f"Error: {str(e)}")
+            self.update_logs(f"Couldn't record audio,\nplease try again.")
 
     def update_logs(self, text):
         self.logs.text = text
