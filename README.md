@@ -37,7 +37,7 @@ sudo apt-get install ffmpeg
 
 sudo apt install portaudio19-dev
 
-pip3 install tensorflow numpy librosa sounddevice matplotlib pillow kivy ffmpeg-python tflite-runtime
+pip3 install tensorflow soundfile numpy librosa sounddevice matplotlib pillow kivy ffmpeg-python tflite-runtime
 
 ffpyplayer and kivy: https://gist.github.com/P1kachu/65dceb8252f277d68229ad6e8df99c69
 
