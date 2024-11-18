@@ -1,4 +1,3 @@
-import os
 import time
 import numpy as np
 import sounddevice as sd
@@ -26,21 +25,27 @@ def display_spectrogram(mel_spec):
     plt.show()
 
 
-while True:
+
+start_time = time.time()
+duration = 4  
+
+while time.time() - start_time < duration:
     print("Starting recording...")
 
-    # Timer for countdown
+    
     for i in range(3, 0, -1):
         print(i)
         time.sleep(1)
 
-    # Record audio
+    
     audio_data = record_audio()
 
-    # Create mel spectrogram
+    
     mel_spec = create_mel_spectrogram(audio_data)
 
-    # Display mel spectrogram
+    
     display_spectrogram(mel_spec)
 
     print("Ready for the next recording...\n")
+
+print("Recording finished after 4 seconds.")
