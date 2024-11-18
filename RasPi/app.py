@@ -150,7 +150,7 @@ class MainApp(BoxLayout):
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
-        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 4)  
+        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 6)
 
     def close_video(self, popup, video):
         popup.dismiss()
