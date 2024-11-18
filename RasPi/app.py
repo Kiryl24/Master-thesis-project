@@ -1,6 +1,6 @@
 import os
 os.environ["KIVY_VIDEO"] = "ffpyplayer"
-
+from kivy.utils import get_color_from_hex
 from kivy.graphics.texture import Texture
 from kivy.uix.image import AsyncImage
 from kivy.app import App
@@ -135,11 +135,11 @@ class MainApp(BoxLayout):
         self.left_panel.add_widget(self.spectrogram_image)
 
         self.right_panel = BoxLayout(orientation='vertical', size_hint=(0.4, 1))
-        self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2))
+        self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2), background_color=(get_color_from_hex('#ffffff')), color=(get_color_from_hex('#e76b00')))
         self.button_analyze.bind(on_press=self.run_ai_script)
         self.right_panel.add_widget(self.button_analyze)
 
-        self.button_help = Button(text="Help", size_hint=(1, 0.2), background_color=(1, 0, 0, 1))
+        self.button_help = Button(text="Help", size_hint=(1, 0.2), color=(get_color_from_hex('#070707')), background_color=(get_color_from_hex('#ffffff')))
         self.button_help.bind(on_press=self.show_help_video)
         self.right_panel.add_widget(self.button_help)
 
@@ -218,14 +218,14 @@ class MainApp(BoxLayout):
         )
         popup.open()
         intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
-        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 6)
+        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 5)
 
     def show_help_video(self, instance):
         help_video = Video(source="PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
-        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 6)
+        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 4)
 
     def close_video(self, popup, video):
         popup.dismiss()
