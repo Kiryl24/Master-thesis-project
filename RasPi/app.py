@@ -135,11 +135,11 @@ class MainApp(BoxLayout):
         self.left_panel.add_widget(self.spectrogram_image)
 
         self.right_panel = BoxLayout(orientation='vertical', size_hint=(0.4, 1))
-        self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2), background_color=(get_color_from_hex('#ffffff')), color=(get_color_from_hex('#e76b00')))
+        self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2), background_color=(get_color_from_hex('#ffffff')), color=(get_color_from_hex('#070707')))
         self.button_analyze.bind(on_press=self.run_ai_script)
         self.right_panel.add_widget(self.button_analyze)
 
-        self.button_help = Button(text="Help", size_hint=(1, 0.2), color=(get_color_from_hex('#070707')), background_color=(get_color_from_hex('#ffffff')))
+        self.button_help = Button(text="Help", size_hint=(1, 0.2), color=(get_color_from_hex('#e76b00')), background_color=(get_color_from_hex('#ffffff')))
         self.button_help.bind(on_press=self.show_help_video)
         self.right_panel.add_widget(self.button_help)
 
