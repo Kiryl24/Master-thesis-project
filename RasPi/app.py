@@ -141,13 +141,13 @@ class MainApp(BoxLayout):
                 os.remove(file)
 
     def play_intro_animation(self):
-        intro_video = Video(source="/path/to/intro.mp4", size_hint=(None, None), size=(480, 320), state='play')
+        intro_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/intro.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Intro", content=intro_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
 
     def show_help_video(self, instance):
-        help_video = Video(source="/path/to/help.mp4", size_hint=(None, None), size=(480, 320), state='play')
+        help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
