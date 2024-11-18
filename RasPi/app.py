@@ -44,7 +44,7 @@ def create_mel_spectrogram(audio, sample_rate=22050):
     mel_spec = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_mels=224, fmax=8000)
     return librosa.power_to_db(mel_spec, ref=np.max)
 
-def save_spectrogram(image, filename, colormap='viridis'):
+def save_spectrogram(image, filename, colormap='hot'):
     plt.figure(figsize=(224, 224), dpi=100)
     plt.axis('off')
     plt.imshow(image, cmap=colormap, aspect='auto')
