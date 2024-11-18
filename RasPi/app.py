@@ -1,6 +1,8 @@
 import os
-
 os.environ["KIVY_VIDEO"] = "ffpyplayer"
+
+from kivy.graphics.texture import Texture
+from kivy.uix.image import AsyncImage
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -65,7 +67,7 @@ def create_mel_spectrogram(audio, sample_rate=22050):
 
 def save_spectrogram(image, filename, colormap='viridis'):
     try:
-        plt.figure(figsize=(1.9, 1.9), dpi=85)
+        plt.figure(figsize=(4, 4), dpi=128)
         plt.axis('off')
         plt.imshow(image, cmap=colormap, aspect='auto')
         plt.savefig(filename, bbox_inches='tight', pad_inches=0)
@@ -74,6 +76,10 @@ def save_spectrogram(image, filename, colormap='viridis'):
         print(f"Spectrogram saved at {filename}")
     except Exception as e:
         print(f"Error saving spectrogram: {e}")
+        
+        print(f"Image shape: {image.shape}")
+        plt.imshow(image, cmap=colormap)
+        plt.show()
 
 def predict_label(mel_image):
     np.set_printoptions(suppress=True)
@@ -129,7 +135,7 @@ class MainApp(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation='horizontal', **kwargs)
         self.left_panel = BoxLayout(orientation='vertical', size_hint=(0.6, 1))
-        self.spectrogram_image = Image()
+        self.spectrogram_image = AsyncImage()
         self.left_panel.add_widget(self.spectrogram_image)
 
         self.right_panel = BoxLayout(orientation='vertical', size_hint=(0.4, 1))
@@ -185,14 +191,15 @@ class MainApp(BoxLayout):
     def update_spectrogram(self, image_path):
         try:
             if os.path.exists(image_path):
+                # Przypisujemy ścieżkę do obrazu i ustawiamy nocache na False
                 self.spectrogram_image.source = image_path
-                self.spectrogram_image.reload()  # Force a reload of the image
+                self.spectrogram_image.reload()  # Używamy reload, żeby obraz się zaktualizował
+                self.spectrogram_image.nocache = False  # Wyłączenie cache, aby obraz był zawsze aktualny
                 print(f"Spectrogram updated with image from {image_path}")
             else:
                 print(f"File not found: {image_path}")
         except Exception as e:
             print(f"Error updating spectrogram: {e}")
-
     def cleanup_temp_files(self):
 
         temp_files = ["temp/temp.wav", "temp/mel_spec_128x128.png", "temp/mel_spec_96x96.png"]
