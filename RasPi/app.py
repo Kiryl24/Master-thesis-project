@@ -16,6 +16,7 @@ import tensorflow as tf
 from PIL import Image as PilImage, ImageOps
 from tensorflow.keras.preprocessing.image import img_to_array
 import matplotlib.pyplot as plt
+from kivy.clock import Clock  
 
 from kivy.config import Config
 Config.set('graphics', 'width', '480')
@@ -67,12 +68,10 @@ def predict_label(mel_image):
     class_name = class_names[predicted_label].strip()
     return class_name, confidence_score
 
-
 class MainApp(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation='horizontal', **kwargs)
 
-        
         self.left_panel = BoxLayout(orientation='vertical', size_hint=(0.6, 1))
         self.spectrogram_image = Image()
         self.left_panel.add_widget(self.spectrogram_image)
@@ -92,7 +91,6 @@ class MainApp(BoxLayout):
         self.add_widget(self.left_panel)
         self.add_widget(self.right_panel)
 
-        
         self.play_intro_animation()
 
     def run_ai_script(self, instance):
@@ -145,12 +143,14 @@ class MainApp(BoxLayout):
         popup = Popup(title="Intro", content=intro_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
+        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 3)  
 
     def show_help_video(self, instance):
         help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
         popup.open()
         help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
+        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 4)  
 
     def close_video(self, popup, video):
         popup.dismiss()
