@@ -41,11 +41,11 @@ def record_audio(duration=4, sample_rate=22050):
     return audio_data.flatten()
 
 def create_mel_spectrogram(audio, sample_rate=22050):
-    mel_spec = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_mels=128, fmax=8000)
+    mel_spec = librosa.feature.melspectrogram(y=audio, sr=sample_rate, n_mels=224, fmax=8000)
     return librosa.power_to_db(mel_spec, ref=np.max)
 
 def save_spectrogram(image, filename, colormap='viridis'):
-    plt.figure(figsize=(128, 128), dpi=100)
+    plt.figure(figsize=(224, 224), dpi=100)
     plt.axis('off')
     plt.imshow(image, cmap=colormap, aspect='auto')
     plt.savefig(filename, bbox_inches='tight', pad_inches=0)
@@ -119,7 +119,7 @@ class MainApp(BoxLayout):
             self.update_logs(f"Couldn't record audio,\n please try again.\n{e} ")
 
     def save_spectrogram_and_update(self, mel_spec):
-        temp_spectrogram_path = "temp/mel_spec_128x128.png"
+        temp_spectrogram_path = "temp/mel_spec_224x224.png"
         save_spectrogram(mel_spec, temp_spectrogram_path)
         temp_grayscale_path = "temp/mel_spec_96x96.png"
         save_grayscale_spectrogram(mel_spec, temp_grayscale_path)
@@ -134,7 +134,7 @@ class MainApp(BoxLayout):
         self.spectrogram_image.reload()
 
     def cleanup_temp_files(self):
-        temp_files = ["temp/temp.wav", "temp/mel_spec_128x128.png", "temp/mel_spec_96x96.png"]
+        temp_files = ["temp/temp.wav", "temp/mel_spec_224x224.png", "temp/mel_spec_96x96.png"]
         for file in temp_files:
             if os.path.exists(file):
                 os.remove(file)
