@@ -123,7 +123,7 @@ class MainApp(BoxLayout):
             class_name, confidence_score = predict_label(mel_image)
             self.update_logs(f"Predicted: {class_name} ({confidence_score * 100:.2f}%)")
         except Exception as e:
-            self.update_logs(f"Error: {str(e)}")
+            self.update_logs(f"Couldn't record audio,\n please try again.")
 
     def update_logs(self, text):
         self.logs.text = text
@@ -154,7 +154,7 @@ class MainApp(BoxLayout):
         popup.open()
         intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
         
-        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 6)
+        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 10)
     def show_help_video(self, instance):
         help_video = Video(source="/home/kiryl/Documents/GitHub/Master-thesis-project/RasPi/PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
         popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
