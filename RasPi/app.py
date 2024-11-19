@@ -12,6 +12,7 @@ from kivy.uix.video import Video
 from kivy.uix.popup import Popup
 from threading import Thread
 import time
+from subprocess import call
 import numpy as np
 import sounddevice as sd
 import librosa
@@ -143,8 +144,13 @@ class MainApp(BoxLayout):
         self.button_help.bind(on_press=self.show_help_video)
         self.right_panel.add_widget(self.button_help)
 
-        self.logs = Label(text="", size_hint=(1, 0.6))
+        self.logs = Label(text="", size_hint=(1, 0.4))
         self.right_panel.add_widget(self.logs)
+
+        self.button_off = Button(text="Shutdown", size_hint=(1, 0.15), background_color=(get_color_from_hex('#FF0000')))
+        self.button_off.bind(on_press=self.off)
+        self.right_panel.add_widget(self.button_off)
+
 
         self.add_widget(self.left_panel)
         self.add_widget(self.right_panel)
@@ -153,7 +159,8 @@ class MainApp(BoxLayout):
 
         self.cleanup_temp_files()
         Thread(target=self.process_audio).start()
-
+    def off(self, instance):
+        call("sudo shutdown -h now", shell=True)
     def process_audio(self):
         try:
             for i in range(3, 0, -1):
