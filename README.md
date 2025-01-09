@@ -1,6 +1,6 @@
 # MasterThesisProject
 
-It is software and embedded field.
+Applied Computer Science fiield - Software, AI and embedded systems.
 
 "Embedded aplication device, determining piano sound color using AI."
 
