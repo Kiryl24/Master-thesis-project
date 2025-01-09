@@ -42,7 +42,7 @@ output_details = interpreter.get_output_details()
 def record_audio(duration=4, sample_rate=44100):
     audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
     sd.wait()
-    # Normalizacja audio do zakresu -1.0 do 1.0
+    
     audio_data = audio_data / np.max(np.abs(audio_data))
     return audio_data.flatten()
 
@@ -54,19 +54,19 @@ def create_mel_spectrogram(audio, sample_rate=44100):
         y=audio,
         sr=sample_rate,
         n_mels=224,
-        fmin=100,  # Minimalna częstotliwość
-        fmax=10000,  # Maksymalna częstotliwość
-        n_fft=2024,  # Rozmiar okna FFT
-        hop_length=512  # Zwiększony, aby dopasować długość do analizy
+        fmin=100,  
+        fmax=10000,  
+        n_fft=2024,  
+        hop_length=512  
     )
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-    # Obrót osi dla poprawnej orientacji wizualnej
+    
     mel_spec_db_flipped = np.flip(mel_spec_db, axis=0)
 
-    # Zapis spektrogramu jako obraz w rozmiarze 96x96
+    
     mel_spec_path_128x128 = os.path.join("temp", "mel_spec_96x96.png")
-    plt.figure(figsize=(8.5, 8.5), dpi=128)  # Dostosowanie rozmiaru obrazu
+    plt.figure(figsize=(8.5, 8.5), dpi=128)  
     plt.axis('off')
     plt.imshow(mel_spec_db_flipped, cmap='viridis', aspect='auto', origin='lower')
     plt.savefig(mel_spec_path_128x128, bbox_inches='tight', pad_inches=0)
@@ -136,11 +136,14 @@ class MainApp(BoxLayout):
         self.left_panel.add_widget(self.spectrogram_image)
 
         self.right_panel = BoxLayout(orientation='vertical', size_hint=(0.4, 1))
-        self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2), background_color=(get_color_from_hex('#ffffff')), color=(get_color_from_hex('#070707')))
+        self.button_analyze = Button(text="Analyze", size_hint=(1, 0.2),
+                                     background_color=(get_color_from_hex('#ffffff')),
+                                     color=(get_color_from_hex('#070707')))
         self.button_analyze.bind(on_press=self.run_ai_script)
         self.right_panel.add_widget(self.button_analyze)
 
-        self.button_help = Button(text="Help", size_hint=(1, 0.2), color=(get_color_from_hex('#e76b00')), background_color=(get_color_from_hex('#ffffff')))
+        self.button_help = Button(text="Help", size_hint=(1, 0.2), color=(get_color_from_hex('#e76b00')),
+                                  background_color=(get_color_from_hex('#ffffff')))
         self.button_help.bind(on_press=self.show_help_video)
         self.right_panel.add_widget(self.button_help)
 
@@ -194,10 +197,10 @@ class MainApp(BoxLayout):
     def update_spectrogram(self, image_path):
         try:
             if os.path.exists(image_path):
-                # Przypisujemy ścieżkę do obrazu i ustawiamy nocache na False
+              
                 self.spectrogram_image.source = image_path
-                self.spectrogram_image.reload()  # Używamy reload, żeby obraz się zaktualizował
-                self.spectrogram_image.nocache = False  # Wyłączenie cache, aby obraz był zawsze aktualny
+                self.spectrogram_image.reload()
+                self.spectrogram_image.nocache = False
                 print(f"Spectrogram updated with image from {image_path}")
             else:
                 print(f"File not found: {image_path}")
