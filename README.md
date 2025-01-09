@@ -45,7 +45,7 @@ GStream is needed.
  
 Graphic interface will be written using Kivy:  https://kivy.org/doc/stable/installation/installation-rpi.html , https://kivy.org/doc/stable/gettingstarted/installation.html#installation-canonical 
 
-Animations will be made with Synfig.
+Animations were made in blender.
 
 
 
