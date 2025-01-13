@@ -19,7 +19,7 @@ def create_mel_spectrogram(audio, sample_rate=44100, title="Mel Spectrogram"):
     )
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-    mel_spec_path = os.path.join("spectrograms", "mel_spec_720x720.png")
+    mel_spec_path = os.path.join("spectrograms", "mel_spec_generic.png")
     plt.figure(figsize=(7.2, 7.2), dpi=100)  # 720x720 pixels
 
     # Dodaj tytuł
@@ -53,9 +53,9 @@ def process_audio(file_path):
     try:
         # Wczytaj dane audio z pliku WAV
         audio_data, sample_rate = librosa.load(file_path, sr=44100)
-
+        sound = "generic"
         # Generuj spektrogram
-        mel_spec_path = create_mel_spectrogram(audio_data, sample_rate, title="Mel Spectrogram")
+        mel_spec_path = create_mel_spectrogram(audio_data, sample_rate, title=f"Mel Spectrogram for {sound} sound")
 
         # Wczytaj obraz spektrogramu
         mel_image = PilImage.open(mel_spec_path)
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     os.makedirs("spectrograms", exist_ok=True)
 
     # Ścieżka do pliku WAV
-    file_path = "WAV/generic/sample_1.wav"
+    file_path = "WAV/generic/sample_4.wav"
 
     # Przetwarzaj audio
     process_audio(file_path)

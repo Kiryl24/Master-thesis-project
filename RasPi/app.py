@@ -62,13 +62,10 @@ def create_mel_spectrogram(audio, sample_rate=44100):
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
     
-    mel_spec_db_flipped = np.flip(mel_spec_db, axis=0)
-
-    
     mel_spec_path_128x128 = os.path.join("temp", "mel_spec_96x96.png")
     plt.figure(figsize=(8.5, 8.5), dpi=128)  
     plt.axis('off')
-    plt.imshow(mel_spec_db_flipped, cmap='viridis', aspect='auto', origin='lower')
+    plt.imshow(mel_spec_db, cmap='viridis', aspect='auto', origin='lower')
     plt.savefig(mel_spec_path_128x128, bbox_inches='tight', pad_inches=0)
     plt.close()
 
