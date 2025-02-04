@@ -120,7 +120,7 @@ def predict_label(mel_image):
     confidence_score = prediction[0][index]
 
     
-    print(f"Color: {class_name}")
+    print(f"Sound: {class_name}")
     print(f"Confidence Score: {confidence_score}")
 
     return class_name, confidence_score
