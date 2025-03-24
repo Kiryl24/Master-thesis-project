@@ -31,16 +31,20 @@ def create_mel_spectrogram(audio, sample_rate=44100, title="Mel Spectrogram"):
 
     # Dodaj kolorową legendę
     plt.colorbar(format='%+2.0f dB')
-
+    ax = plt.gca()
     # Etykiety osi
     plt.xlabel('Czas (s)')
     plt.ylabel('Częstotliwość (Hz)')
-
+    base_frequency = 440  # Ton podstawowy (1 rząd) - linia czerwona
+    last_frequency = 7040  # Ostatnia harmoniczna (16 rząd)
+    max_n = last_frequency // base_frequency  # 7040 / 440 = 16
     # Dodaj linię przy 440 Hz z podpisem "A4 Frequency"
-    plt.axhline(y=440, color='r', linestyle='-')
-    plt.text(plt.xlim()[1], plt.ylim()[1],  'A4 Frequency 440Hz', color='r', ha='right', va='top', fontsize=20,
-
-             bbox=dict(facecolor='white', alpha=0.0, edgecolor='none'))
+    for n in range(1, int(max_n) + 1):
+        freq = n * base_frequency
+        plt.axhline(y=freq, color='white', linestyle='-', alpha=0.4)
+        # Dodanie etykiety dla każdej harmonicznej
+        ax.text(0.85, freq, f'n = {n}', color='black', ha='left', va='center', fontweight='bold',
+                fontsize=10, transform=ax.get_yaxis_transform())
 
     # Zapisz wykres
     plt.savefig(mel_spec_path, bbox_inches='tight', pad_inches=0)
@@ -55,7 +59,7 @@ def process_audio(file_path):
         audio_data, sample_rate = librosa.load(file_path, sr=44100)
         sound = "generic"
         # Generuj spektrogram
-        mel_spec_path = create_mel_spectrogram(audio_data, sample_rate, title=f"Mel Spectrogram for {sound} sound")
+        mel_spec_path = create_mel_spectrogram(audio_data, sample_rate, title=f"Mel Spectrogram for {sound} sound with harmonic series")
 
         # Wczytaj obraz spektrogramu
         mel_image = PilImage.open(mel_spec_path)
