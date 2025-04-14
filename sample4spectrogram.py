@@ -7,7 +7,7 @@ from PIL import Image as PilImage
 import soundfile as sf
 
 
-def create_mel_spectrogram(audio, sample_rate=44100, title="Mel Spectrogram"):
+def create_mel_spectrogram(audio, sample_rate=44100, title="Mel Spectrogram for Acoustic instrument"):
     mel_spec = librosa.feature.melspectrogram(
         y=audio,
         sr=sample_rate,
@@ -19,7 +19,7 @@ def create_mel_spectrogram(audio, sample_rate=44100, title="Mel Spectrogram"):
     )
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-    mel_spec_path = os.path.join("spectrograms", "mel_spec_generic.png")
+    mel_spec_path = os.path.join("spectrograms", "mel_spec_soft_acoustic.png")
     plt.figure(figsize=(7.2, 7.2), dpi=100)  # 720x720 pixels
 
     # Dodaj tytuł
@@ -57,7 +57,7 @@ def process_audio(file_path):
     try:
         # Wczytaj dane audio z pliku WAV
         audio_data, sample_rate = librosa.load(file_path, sr=44100)
-        sound = "generic"
+        sound = "soft"
         # Generuj spektrogram
         mel_spec_path = create_mel_spectrogram(audio_data, sample_rate, title=f"Mel Spectrogram for {sound} sound with harmonic series")
 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     os.makedirs("spectrograms", exist_ok=True)
 
     # Ścieżka do pliku WAV
-    file_path = "WAV/generic/sample_4.wav"
+    file_path = "WAV/soft/sample_1.wav"
 
     # Przetwarzaj audio
     process_audio(file_path)
