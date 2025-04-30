@@ -1,14 +1,13 @@
 import os
-os.environ["KIVY_VIDEO"] = "ffpyplayer"
+
 from kivy.utils import get_color_from_hex
 from kivy.graphics.texture import Texture
-from kivy.uix.image import AsyncImage
+from kivy.uix.image import AsyncImage, Image
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.image import Image
 from kivy.uix.label import Label
-from kivy.uix.video import Video
+
 from kivy.uix.popup import Popup
 from threading import Thread
 import time
@@ -133,10 +132,10 @@ class MainApp(BoxLayout):
             Clock.schedule_once(lambda dt: self.update_logs("Generating spectrograms..."))
             mel_spec_path_128x128 = create_mel_spectrogram(audio_data)
 
+            Clock.schedule_once(lambda dt: self.update_spectrogram(mel_spec_path_128x128))
+
             Clock.schedule_once(lambda dt: self.update_logs("Predicting label..."))
             mel_image = PilImage.open(mel_spec_path_128x128)
-
-            Clock.schedule_once(lambda dt: self.update_spectrogram(mel_spec_path_128x128))
 
             class_name, confidence_score = self.predict_label(mel_image)
             Clock.schedule_once(lambda dt: self.update_logs(f"Color: {class_name}\n{confidence_score * 100:.2f}%"))
@@ -198,33 +197,36 @@ class MainApp(BoxLayout):
                 os.remove(file)
 
     def show_intro_popup(self):
-        intro_video = Video(
-            source="intro.mp4",
+        gif_image = Image(
+            source="intro.gif",
+            anim_delay=0.05,
             size_hint=(None, None),
-            size=(480, 320),
-            state='play'
+            size=(480, 320)
         )
         popup = Popup(
             title="Welcome!",
-            content=intro_video,
+            content=gif_image,
             size_hint=(None, None),
             size=(480, 320)
         )
         popup.open()
-        intro_video.bind(on_stop=lambda instance: self.close_video(popup, intro_video))
-        Clock.schedule_once(lambda dt: self.close_video(popup, intro_video), 5)
+        Clock.schedule_once(lambda dt: popup.dismiss(), 5)
 
     def show_help_video(self, instance):
-        help_video = Video(source="PianoInstruction.mp4", size_hint=(None, None), size=(480, 320), state='play')
-        popup = Popup(title="Help", content=help_video, size_hint=(None, None), size=(480, 320))
+        gif_image = Image(
+            source="PianoInstruction.gif",
+            anim_delay=0.05,
+            size_hint=(None, None),
+            size=(480, 320)
+        )
+        popup = Popup(
+            title="Help",
+            content=gif_image,
+            size_hint=(None, None),
+            size=(480, 320)
+        )
         popup.open()
-        help_video.bind(on_stop=lambda instance: self.close_video(popup, help_video))
-        Clock.schedule_once(lambda dt: self.close_video(popup, help_video), 4)
-
-    def close_video(self, popup, video):
-        popup.dismiss()
-        video.state = 'stop'
-        video.unload()
+        Clock.schedule_once(lambda dt: popup.dismiss(), 4)
 
 
 class SpectrogramApp(App):
