@@ -2,7 +2,7 @@
 
 Applied Computer Science fiield - Software, AI and embedded systems.
 
-"Embedded aplication device, determining piano sound color using AI."
+"An application that determines sound colors by analyzing the spectrogram"
 
 AI recognizes 3 sound colors:
  - soft
@@ -39,13 +39,9 @@ sudo apt install portaudio19-dev
 
 pip3 install tensorflow soundfile numpy librosa sounddevice matplotlib pillow kivy ffmpeg-python tflite-runtime
 
-ffpyplayer and kivy: https://gist.github.com/P1kachu/65dceb8252f277d68229ad6e8df99c69
-
 GStream is needed.
  
-Graphic interface will be written using Kivy:  https://kivy.org/doc/stable/installation/installation-rpi.html , https://kivy.org/doc/stable/gettingstarted/installation.html#installation-canonical 
-
-Animations were made in blender.
+Graphic interface will be written using tkinter.
 
 
 
