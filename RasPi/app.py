@@ -124,7 +124,7 @@ class SpectrogramApp:
         interpreter = tf.lite.Interpreter(model_path=self.model_path)
         interpreter.allocate_tensors()
 
-        with open("labels.txt", "r") as f:
+        with open("/home/kiryl/Documents/GitHub/Master-thesis-project/AI/Models/TM/labels.txt", "r") as f:
             class_names = f.readlines()
 
         input_details = interpreter.get_input_details()

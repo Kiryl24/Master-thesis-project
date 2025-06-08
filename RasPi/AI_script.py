@@ -12,10 +12,10 @@ from tensorflow.keras.preprocessing.image import img_to_array
 if not os.path.exists('temp'):
     os.makedirs('temp')
 
-interpreter = tf.lite.Interpreter(model_path="model_96_TM.tflite")
+interpreter = tf.lite.Interpreter(model_path="/home/kiryl/Documents/GitHub/Master-thesis-project/AI/Models/TM/model_96_TM.tflite")
 interpreter.allocate_tensors()
 
-class_names = open("labels.txt", "r").readlines()[1:]
+class_names = open("/home/kiryl/Documents/GitHub/Master-thesis-project/AI/Models/TM/labels.txt", "r").readlines()[1:]
 
 
 input_details = interpreter.get_input_details()
