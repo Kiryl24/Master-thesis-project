@@ -48,7 +48,7 @@ class SpectrogramApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Spectrogram Classifier")
-        self.model_path = "model_96_TM.tflite"
+        self.model_path = "/home/kiryl/Documents/GitHub/Master-thesis-project/AI/Models/TM/model_96_TM.tflite"
 
         self.left_frame = tk.Frame(root, width=300)
         self.left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
